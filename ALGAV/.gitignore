@@ -10,6 +10,8 @@
 .idea/tasks.xml
 
 # Sensitive or high-churn files:
+.idea/
+.idea/copyright/*
 .idea/dataSources/
 .idea/dataSources.ids
 .idea/dataSources.xml
@@ -27,6 +29,7 @@
 
 ## File-based project format:
 *.iws
+*.iml
 
 ## Plugin-specific files:
 
