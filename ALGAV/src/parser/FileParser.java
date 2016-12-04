@@ -22,17 +22,15 @@ public class FileParser implements Runnable {
         this.strings = strings;
     }
 
-
     Set<String> readFile() {
         try (BufferedReader reader = new BufferedReader(source)) {
 
-            reader.lines().map(
-                    line -> strings.addAll(Arrays.asList(line
-                            .split(SEPARATOR))));
-            return strings;
+            reader.lines().forEach(line -> strings.addAll(Arrays.asList(line.split(SEPARATOR))));
+
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+        return strings;
     }
 
     @Override
