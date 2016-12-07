@@ -192,7 +192,11 @@ public class PatriciaTrie implements ITrie {
 
 	@Override
 	public int ComptageNil() {
-		return 0;
+		int cpt = 128 - nodes.size();
+		for(PatriciaTrie p : nodes){
+			cpt += p.ComptageNil();
+		}
+		return cpt;
 	}
 
 	@Override
@@ -309,10 +313,124 @@ public class PatriciaTrie implements ITrie {
 		return null;
 	}
 
+	public void Fusion(PatriciaTrie p) {
+		p.buildFusionTree(this, "");
+
+	}
+
+	private void buildFusionTree(PatriciaTrie p, String s) {
+
+		if (last == ENDCHAR)
+			p.addWord(s);
+		if (isLeaf())
+			return;
+
+		for (PatriciaTrie p2 : nodes) {
+			p2.buildFusionTree(p, s + p2.value);
+		}
+		return;
+	}
+
+	public HybridTrie convert() {
+		int cpt = 0;
+		HybridTrie h = new HybridTrie();
+		HNode root = h.getRoot();
+		HNode hnode;
+		for (PatriciaTrie p : nodes) {
+			hnode = root;
+			if (p.value.equals("")) {
+				hnode.setVal(cpt++ + "");
+				break;
+			}
+			
+			if (hnode.getMid() == null) {
+				hnode.setMid(new HNode());
+				hnode = hnode.getMid();
+			}else {
+				hnode = getNextNode(hnode.getMid(), p.value.charAt(0));
+			}
+
+			hnode.setC(p.value.charAt(0));
+			for (int i = 1; i < p.value.length(); i++) {
+				hnode.setMid(new HNode());
+				hnode.getMid().setC(p.value.charAt(i));
+				hnode = hnode.getMid();
+			}
+
+			if (p.isLeaf()) {
+				hnode.setVal(cpt++ + "");
+				break;
+			}
+
+			p.convertNode(hnode, cpt);
+
+		}
+		return h;
+
+	}
+
+	private void convertNode(HNode hnode, int cpt) {
+
+		HNode temp;
+		temp = hnode;
+
+		for (PatriciaTrie p : nodes) {
+
+			hnode = temp;
+
+			if (p.value.equals("")) {
+				temp.setVal(cpt++ + "");
+			
+			} else {
+				
+				if (hnode.getMid() == null) {
+					hnode.setMid(new HNode());
+					hnode = hnode.getMid();
+				}else {
+					hnode = getNextNode(hnode.getMid(), p.value.charAt(0));
+				}
+				
+				hnode.setC(p.value.charAt(0));
+				for (int i = 1; i < p.value.length(); i++) {
+					hnode.setMid(new HNode());
+					hnode.getMid().setC(p.value.charAt(i));
+					hnode = hnode.getMid();
+				}
+
+				if (p.isLeaf()) {
+					hnode.setVal(cpt++ + "");
+					
+				}else{
+					p.convertNode(hnode, cpt);
+				}
+			
+			}
+		}
+
+		return;
+
+	}
+
+	private HNode getNextNode(HNode hnode, char charAt) {
+		if (charAt < hnode.getC()) {
+			if(hnode.getLeft() == null){
+			hnode.setLeft(new HNode());
+			return hnode.getLeft();
+			}
+			return  getNextNode(hnode.getLeft(),charAt);
+		} else {
+			if(hnode.getRight() == null){
+			hnode.setRight(new HNode());
+			return  hnode.getRight();
+			}
+			return  getNextNode(hnode.getRight(),charAt);
+		}
+	}
+
 	@Override
 	public String toString() {
-		
-		return value + "/"+last;
+
+		return value + "/" + last;
 	}
 
 }
