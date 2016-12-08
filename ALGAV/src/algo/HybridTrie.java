@@ -1,9 +1,10 @@
 package algo;
 
-import algo.interfaces.ITrie;
-
+import java.awt.Graphics;
 import java.util.Collections;
 import java.util.List;
+
+import algo.interfaces.ITrie;
 
 public class HybridTrie implements ITrie {
 	/*******************************************************/
@@ -61,8 +62,21 @@ public class HybridTrie implements ITrie {
 	/*******************************************************/
 	/*-------------------USEFUL METHODS--------------------*/
 	/*******************************************************/
-	private void draw() {
-		HNode.draw(root, 0, 0);
+	public void draw(Graphics g) {
+		HNode.draw(g,root, 0, 0);
+	}
+
+	public PatriciaTrie convert() {
+		List<PatriciaTrie> patriciaTries = HNode.getNeighbour(root, "");
+		PatriciaTrie p = new PatriciaTrie();
+		p.addNodes(patriciaTries);
+		return p;
+
+	}
+
+	public void addWord(String string) {
+		root = HNode.insert(root, string);
+
 	}
 
 	/*******************************************************/

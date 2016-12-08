@@ -1,5 +1,6 @@
 package algo;
 
+import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,9 +105,6 @@ public class HNode {
 	public static boolean search(HNode node, String word) {
 		if (node == null) {
 			return false;
-		} else if (word.length() == 0) {
-			return node.end;
-
 		} else {
 			char x = word.charAt(0);
 			if (x < node.val) {
@@ -114,6 +112,9 @@ public class HNode {
 			} else if (x > node.val) {
 				return search(node.right, word);
 			} else {
+				if (word.length() == 1) {
+					return node.end;
+				}
 				return search(node.mid, word.substring(1));
 			}
 		}
@@ -134,10 +135,9 @@ public class HNode {
 		}
 	}
 
-
-
 	/*******************************************************/
 	/*-------------------USEFUL METHODS--------------------*/
+
 	/*******************************************************/
 	public static List<String> getWords(HNode node, String prefix) {
 		List<String> words = new ArrayList<>();
@@ -290,16 +290,16 @@ public class HNode {
 	}
 
 	/* Print plot */
-	public static void draw(HNode node, int i, int j) {
+	public static void draw(Graphics g, HNode node, int i, int j) {
 		if (node == null) {
 			return;
 		}
-		System.out.println(node.val + i + j);
-		draw(node.left, i - (widthL(node.mid) + widthR(node.left) + 1) * JMP_X, j + JMP_Y);
-		System.out.println(node.val + i + j);
-		draw(node.mid, i, j + JMP_Y);
-		System.out.println(node.val + i + j);
-		draw(node.right, i - (widthR(node.mid) + widthL(node.right) + 1) * JMP_X, j + JMP_Y);
+		g.drawOval(5, 5, i, j);
+		draw(g, node.left, i - (widthL(node.mid) + widthR(node.left) + 1) * JMP_X, j + JMP_Y);
+		g.drawOval(5, 5, i, j);
+		draw(g, node.mid, i, j + JMP_Y);
+		g.drawOval(5, 5, i, j);
+		draw(g, node.right, i - (widthR(node.mid) + widthL(node.right) + 1) * JMP_X, j + JMP_Y);
 		System.out.println();
 
 	}
@@ -327,6 +327,70 @@ public class HNode {
 			else
 				return (width(node.left) + width(node.mid) + width(node.right));
 		}
+	}
+
+	public static List<PatriciaTrie> getNeighbour(HNode node, String prefix) {
+		List<PatriciaTrie> tries = new ArrayList<>();
+		if (node == null) {
+			return tries;
+		}
+		PatriciaTrie l = getLongestPrefix(node.left, prefix);
+		tries.add(l);
+		tries.addAll(getNeighbour(node.left, prefix));
+		PatriciaTrie r = getLongestPrefix(node.right, prefix);
+		tries.add(r);
+		tries.addAll(getNeighbour(node.right, prefix));
+		tries.add(getLongestPrefix(node, prefix));
+
+		return tries;
+	}
+
+	public static PatriciaTrie getLongestPrefix(HNode node, String prefix) {
+		if (node == null) {
+			return null;
+		}
+		if (isLeaf(node)) {
+			return new PatriciaTrie(prefix + node.val, node.end);
+		} else {
+			if (hasSon(node)) {
+				PatriciaTrie p;
+				if (hasNeighbour(node.mid)) {
+					p = new PatriciaTrie(prefix, node.end);
+					p.addNodes(getNeighbour(node.mid, prefix));
+					p.addNode(getLongestPrefix(node.mid, ""));
+				} else {
+					p = getLongestPrefix(node.mid, prefix + node.val);
+				}
+				return p;
+
+			}
+
+		}
+		return null;
+
+	}
+
+	private static boolean isLeaf(HNode node) {
+		return node.end && node.mid == null && node.left == null && node.right == null;
+	}
+
+	private static boolean hasNeighbour(HNode node) {
+		return node.left != null || node.right != null;
+	}
+
+	private static boolean hasSon(HNode node) {
+		return node.mid != null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return val + "";
 	}
 
 }

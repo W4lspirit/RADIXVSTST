@@ -1,4 +1,4 @@
-package test.parser;
+package test.hybrid;
 
 import static org.junit.Assert.*;
 
@@ -11,7 +11,7 @@ import org.junit.Test;
 import algo.HNode;
 import parser.FilesParser;
 
-public class TestNodeInsertion {
+public class insertionNodeTest {
 
 	@Test
 	public void simpleInsertTest() {
