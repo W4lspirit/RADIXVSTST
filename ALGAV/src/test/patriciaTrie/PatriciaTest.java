@@ -1,16 +1,12 @@
 package test.patriciaTrie;
 
-import algo.HybridTrie;
 import algo.PatriciaTrie;
-
-import java.util.List;
 
 public class PatriciaTest {
 
 	public static void main(String[] args) {
 
 		PatriciaTrie root = new PatriciaTrie();
-		PatriciaTrie root2 = new PatriciaTrie();
 
 		/*
 		 * FilesParser f = new FilesParser(); List<String> l = new
@@ -39,7 +35,6 @@ public class PatriciaTest {
 
 		System.out.println(root.ComptageNil());
 
-		HybridTrie h = root.convert();
 
 		root.Suppression("slow");
 
@@ -52,7 +47,6 @@ public class PatriciaTest {
 		b = root.search("slower");
 		System.out.println(b);
 
-		List<String> words = root.ListeMots();
 		System.out.println(root.ComptageMots());
 		System.out.println(root.Hauteur());
 		System.out.println(root.ProfondeurMoyenne());

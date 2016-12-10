@@ -8,449 +8,464 @@ import java.util.List;
 
 public class PatriciaTrie implements ITrie {
 
-	/*******************************************************/
-	/*-------------------PARAMETERS-----------------*/
+    /*******************************************************/
+    /*-------------------PARAMETERS-----------------*/
 
-	/*******************************************************/
+    /*******************************************************/
 
-	private static final char ENDCHAR = Character.MIN_VALUE;
+    private static final char ENDCHAR = Character.MIN_VALUE;
 
-	private List<PatriciaTrie> nodes;
-	private String value;
-	private Character last;
+    private List<PatriciaTrie> nodes;
+    private String value;
+    private Character last;
 
-	/*******************************************************/
+    /*******************************************************/
 	/*-------------------TOOL METHODES-----------------*/
+    /*******************************************************/
 
-	/*******************************************************/
+    public PatriciaTrie(String value) {
+        this.value = value;
+        nodes = new ArrayList<>();
+        last = 'n';
+    }
 
-	public PatriciaTrie(String value) {
-		this.value = value;
-		nodes = new ArrayList<>();
-		last = 'n';
-	}
+    public PatriciaTrie(String value, boolean isWord) {
+        this.value = value;
+        nodes = new ArrayList<>();
+        if (isWord)
+            last = ENDCHAR;
+        else
+            last = 'n';
+    }
 
-	public PatriciaTrie(String value, boolean isWord) {
-		this.value = value;
-		nodes = new ArrayList<>();
-		if (isWord)
-			last = ENDCHAR;
-		else
-			last = 'n';
-	}
+    public PatriciaTrie(PatriciaTrie p, String suffix) {
+        nodes = p.nodes;
+        value = suffix;
+        last = p.last;
 
-	public PatriciaTrie(PatriciaTrie p, String suffix) {
-		nodes = p.nodes;
-		value = suffix;
-		last = p.last;
+    }
 
-	}
+    public PatriciaTrie() {
+        value = "";
+        nodes = new ArrayList<>();
+        last = 'n';
+    }
 
-	public PatriciaTrie() {
-		value = "";
-		nodes = new ArrayList<>();
-		last = 'n';
-	}
+    public boolean isLeaf() {
+        return nodes.size() == 0;
+    }
 
-	public boolean isLeaf() {
-		return nodes.size() == 0;
-	}
+    public boolean isWord() {
+        return last == ENDCHAR;
+    }
 
-	public boolean isWord() {
-		return last == ENDCHAR;
-	}
+    public String getWord() {
+        return "";
+    }
 
-	public String getWord() {
-		return "";
-	}
+    public void addWord(String word) {
+        int charFound = 0;
 
-	public void addWord(String word) {
-		int charFound = 0;
+        for (PatriciaTrie p : nodes) {
+            int min;
+            if (word.length() >= p.value.length()) {
+                min = p.value.length();
+            } else {
+                min = word.length();
 
-		for (PatriciaTrie p : nodes) {
-			int min;
-			if (word.length() >= p.value.length()) {
-				min = p.value.length();
-			} else {
-				min = word.length();
+            }
 
-			}
+            for (int i = 0; i < min; i++) {
+                if (word.charAt(i) != p.value.charAt(i))
+                    break;
+                charFound++;
+            }
 
-			for (int i = 0; i < min; i++) {
-				if (word.charAt(i) != p.value.charAt(i))
-					break;
-				charFound++;
-			}
+            if (charFound != 0) {
+                String temp = word.substring(charFound);
+                if (charFound == p.value.length()) {
+                    if (p.isLeaf()) {
+                        p.last = 'n';
+                        p.nodes.add(new PatriciaTrie("", true));
+                        p.nodes.add(new PatriciaTrie(temp, true));
+                        return;
+                    }
+                    p.addWord(temp);
+                    return;
+                }
+                String prefix = p.value.substring(0, charFound);
+                String suffix = p.value.substring(charFound);
+                PatriciaTrie pat = new PatriciaTrie(p, suffix);
+                p.nodes = new ArrayList<>();
+                p.last = 'n';
+                p.value = prefix;
+                p.nodes.add(pat);
+                p.nodes.add(new PatriciaTrie(temp, true));
+                return;
 
-			if (charFound != 0) {
-				String temp = word.substring(charFound);
-				if (charFound == p.value.length()) {
-					if (p.isLeaf()) {
-						p.last = 'n';
-						p.nodes.add(new PatriciaTrie("", true));
-						p.nodes.add(new PatriciaTrie(temp, true));
-						return;
-					}
-					p.addWord(temp);
-					return;
-				}
-				String prefix = p.value.substring(0, charFound);
-				String suffix = p.value.substring(charFound);
-				PatriciaTrie pat = new PatriciaTrie(p, suffix);
-				p.nodes = new ArrayList<>();
-				p.last = 'n';
-				p.value = prefix;
-				p.nodes.add(pat);
-				p.nodes.add(new PatriciaTrie(temp, true));
-				return;
+            }
 
-			}
+        }
 
-		}
+        nodes.add(new PatriciaTrie(word, true));
 
-		nodes.add(new PatriciaTrie(word, true));
+    }
 
-	}
-
-	/*******************************************************/
+    /*******************************************************/
 	/*-------------------PRINCIPAL METHODS-----------------*/
 
-	/*******************************************************/
+    /*******************************************************/
 
-	@Override
-	public boolean search(String word) {
-		int min;
-		int charFound = 0;
-		for (PatriciaTrie p : nodes) {
-			if (word.equals("") && p.value.equals("") && p.last == ENDCHAR)
-				return true;
-			if (word.length() >= p.value.length()) {
-				min = p.value.length();
-			} else {
-				min = word.length();
+    @Override
+    public boolean search(String word) {
+        int min;
+        int charFound = 0;
+        for (PatriciaTrie p : nodes) {
+            if (word.equals("") && p.value.equals("") && p.last == ENDCHAR)
+                return true;
+            if (word.length() >= p.value.length()) {
+                min = p.value.length();
+            } else {
+                min = word.length();
 
-			}
-			for (int i = 0; i < min; i++) {
-				if (word.charAt(i) != p.value.charAt(i))
-					break;
-				charFound++;
-			}
-			if (charFound != 0) {
-				String temp = word.substring(charFound);
-				if (charFound == p.value.length()) {
-					if (p.last == ENDCHAR && word.equals(p.value))
-						return true;
-				}
+            }
+            for (int i = 0; i < min; i++) {
+                if (word.charAt(i) != p.value.charAt(i))
+                    break;
+                charFound++;
+            }
+            if (charFound != 0) {
+                String temp = word.substring(charFound);
+                if (charFound == p.value.length()) {
+                    if (p.last == ENDCHAR && word.equals(p.value))
+                        return true;
+                }
 
-				if (isLeaf())
-					return false;
-				return p.search(temp);
+                return !isLeaf() && p.search(temp);
 
-			}
-		}
-		return false;
-	}
+            }
+        }
+        return false;
+    }
 
-	@Override
-	public int ComptageMots() {
-		int cpt = 0;
-		if (isWord())
-			cpt++;
-		for (PatriciaTrie p : nodes) {
-			cpt += p.ComptageMots();
-		}
-		return cpt;
-	}
+    @Override
+    public int ComptageMots() {
+        int cpt = 0;
+        if (isWord())
+            cpt++;
+        for (PatriciaTrie p : nodes) {
+            cpt += p.ComptageMots();
+        }
+        return cpt;
+    }
 
-	@Override
-	public List<String> ListeMots() {
-		List<String> words = new ArrayList<>();
+    @Override
+    public List<String> ListeMots() {
+        List<String> words = new ArrayList<>();
 
-		for (PatriciaTrie p : nodes) {
-			p.buildWords(words, p.value);
-		}
-		Collections.sort(words);
-		return words;
-	}
+        for (PatriciaTrie p : nodes) {
+            p.buildWords(words, p.value);
+        }
+        Collections.sort(words);
+        return words;
+    }
 
-	private void buildWords(List<String> words, String s) {
+    private void buildWords(List<String> words, String s) {
 
-		if (last == ENDCHAR)
-			words.add(s);
-		if (isLeaf())
-			return;
+        if (last == ENDCHAR)
+            words.add(s);
+        if (isLeaf())
+            return;
 
-		for (PatriciaTrie p : nodes) {
-			p.buildWords(words, s + p.value);
-		}
+        for (PatriciaTrie p : nodes) {
+            p.buildWords(words, s + p.value);
+        }
 
-	}
+    }
 
-	@Override
-	public int ComptageNil() {
-		int cpt = 128 - nodes.size();
-		for (PatriciaTrie p : nodes) {
-			cpt += p.ComptageNil();
-		}
-		return cpt;
-	}
+    @Override
+    public int ComptageNil() {
+        int cpt = 128 - nodes.size();
+        for (PatriciaTrie p : nodes) {
+            cpt += p.ComptageNil();
+        }
+        return cpt;
+    }
 
-	@Override
-	public int Hauteur() {
+    @Override
+    public int Hauteur() {
 
-		int cpt = 0;
-		int temp = cpt;
-		for (PatriciaTrie p : nodes) {
-			int max = temp;
-			max += p.HauteurNodes();
-			if (max > cpt)
-				cpt = max;
-		}
-		return cpt;
-	}
+        int cpt = 0;
+        int temp = cpt;
+        for (PatriciaTrie p : nodes) {
+            int max = temp;
+            max += p.HauteurNodes();
+            if (max > cpt)
+                cpt = max;
+        }
+        return cpt;
+    }
 
-	public int HauteurNodes() {
-		int cpt = 1;
-		int temp = cpt;
-		for (PatriciaTrie p : nodes) {
-			int max = temp;
-			max += p.HauteurNodes();
-			if (max > cpt)
-				cpt = max;
-		}
-		return cpt;
-	}
+    public int HauteurNodes() {
+        int cpt = 1;
+        int temp = cpt;
+        for (PatriciaTrie p : nodes) {
+            int max = temp;
+            max += p.HauteurNodes();
+            if (max > cpt)
+                cpt = max;
+        }
+        return cpt;
+    }
 
-	@Override
-	public int ProfondeurMoyenne() {
-		int cpt = 1;
-		if (isLeaf())
-			return cpt;
-		int temp = cpt;
-		int moy = 0;
+    @Override
+    public int ProfondeurMoyenne() {
+        int cpt = 1;
+        if (isLeaf())
+            return cpt;
+        int temp = cpt;
+        int moy = 0;
 
-		for (PatriciaTrie p : nodes) {
-			moy += (temp + p.ProfondeurMoyenne());
-		}
-		cpt = moy / nodes.size();
+        for (PatriciaTrie p : nodes) {
+            moy += (temp + p.ProfondeurMoyenne());
+        }
+        cpt = moy / nodes.size();
 
-		return cpt;
+        return cpt;
 
-	}
+    }
 
-	@Override
-	public int Prefixe(String word) {
-		int min;
-		int charFound = 0;
-		for (PatriciaTrie p : nodes) { // On parcourt les noeuds fils du noeud courant
-			
-		
-			if (word.length() >= p.value.length()) { 
-				min = p.value.length();				
-			} else {								// Ici on calcule le minimum 						
-				min = word.length();				//entre le mot et la valeur du noeud				
-													
-			}										
-			
-			
-			for (int i = 0; i < min; i++) { // on parcourt caractère après caractère
-				if (word.charAt(i) != p.value.charAt(i))
-					break; // le caractère est différent, on sort
-				charFound++;
-			}
-			if (charFound != 0) {// des caractères ont été trouvés pour ce fils
-				
-				String temp = word.substring(charFound); // on calcule la chaine des 
-														//caractères restant a trouver dans le fils
+    @Override
+    public int Prefixe(String word) {
+        int min;
+        int charFound = 0;
+        for (PatriciaTrie p : nodes) { // On parcourt les noeuds fils du noeud
+            // courant
 
-				if (temp.equals("")) // si il ne reste aucun caractère
-					
-					return p.ComptageMots();// traitement: ici pour prefixe, le nombre de mots pour 
-											//ce prefixe.
-				
-				return p.Prefixe(temp);//sinon on rapelle cette meme fonction sur ce 
-										//fils avec la chaine des caractères restants
+            if (word.length() >= p.value.length()) {
+                min = p.value.length();
+            } else { // Ici on calcule le minimum
+                min = word.length(); // entre le mot et la valeur du noeud
 
-			}
-		}
-		return 0;
-	}
+            }
 
-	@Override
-	public ITrie Suppression(String word) {
+            for (int i = 0; i < min; i++) { // on parcourt caractere apres
+                // caractere
+                if (word.charAt(i) != p.value.charAt(i))
+                    break; // le caractere est different, on sort
+                charFound++;
+            }
+            if (charFound != 0) {// des caracteres ont ete trouves pour ce
+                // fils
 
-		int min;
-		int charFound = 0;
-		for (int j = 0; j < nodes.size(); j++) {
-			PatriciaTrie p = nodes.get(j);
-			if (word.length() >= p.value.length()) {
-				min = p.value.length();
-			} else {
-				min = word.length();
+                String temp = word.substring(charFound);
+                // on calcule la chaine
+                // des
+                // caracteres
+                // restant a trouver
+                // dans le fils
 
-			}
-			for (int i = 0; i < min; i++) {
-				if (word.charAt(i) != p.value.charAt(i))
-					break;
-				charFound++;
-			}
-			if (charFound != 0 || word.equals("")) {
-				String temp = word.substring(charFound);
-				if (word.equals(p.value) && p.last == ENDCHAR) {
-					if (p.isLeaf()) {
-						nodes.remove(j);
-						if (nodes.size() == 1) {
-							PatriciaTrie son = nodes.get(0);
-							last = son.last;
-							value += son.value;
-							nodes = son.nodes;
-						}
-					}
+                if (temp.equals("")) // si il ne reste aucun caractere
 
-					return null;
+                    return p.ComptageMots();// traitement: ici pour prefixe, le
+                // nombre de mots pour
+                // ce prefixe.
 
-				}
+                return p.Prefixe(temp);// sinon on rapelle cette meme fonction
+                // sur ce
+                // fils avec la chaine des caracteres
+                // restants
 
-				p.Suppression(temp);
-				return null;
-			}
+            }
+        }
+        return 0;
+    }
 
-		}
-		return null;
-	}
+    @Override
+    public ITrie Suppression(String word) {
 
-	public void Fusion(PatriciaTrie p) {
-		p.buildFusionTree(this, "");
+        int min;
+        int charFound = 0;
+        for (int j = 0; j < nodes.size(); j++) {
+            PatriciaTrie p = nodes.get(j);
+            if (word.length() >= p.value.length()) {
+                min = p.value.length();
+            } else {
+                min = word.length();
 
-	}
+            }
+            for (int i = 0; i < min; i++) {
+                if (word.charAt(i) != p.value.charAt(i))
+                    break;
+                charFound++;
+            }
+            if (charFound != 0 || word.equals("")) {
+                String temp = word.substring(charFound);
+                if (word.equals(p.value) && p.last == ENDCHAR) {
+                    if (p.isLeaf()) {
+                        nodes.remove(j);
+                        if (nodes.size() == 1) {
+                            PatriciaTrie son = nodes.get(0);
+                            last = son.last;
+                            value += son.value;
+                            nodes = son.nodes;
+                        }
+                    }
 
-	private void buildFusionTree(PatriciaTrie p, String s) {
+                    return null;
 
-		if (last == ENDCHAR)
-			p.addWord(s);
-		if (isLeaf())
-			return;
+                }
 
-		for (PatriciaTrie p2 : nodes) {
-			p2.buildFusionTree(p, s + p2.value);
-		}
-	}
+                p.Suppression(temp);
+                return null;
+            }
 
-	public HybridTrie convert() {
+        }
+        return null;
+    }
 
-		HybridTrie h = new HybridTrie();
-		HNode hnode;
-		for (PatriciaTrie p : nodes) {
-			String test = p.value;
-			hnode = h.getRoot();
-			if (p.value.equals("")) {
-				hnode.setEnd(true);
-				break;
-			}
+    public void Fusion(PatriciaTrie p) {
+        p.buildFusionTree(this, "");
 
-			if (hnode == null) {
-				h.setRoot(new HNode());
-				hnode = h.getRoot();
-			} else {
-				hnode = getNextNode(hnode, p.value.charAt(0));
-			}
+    }
 
-			hnode.setVal(p.value.charAt(0));
-			for (int i = 1; i < p.value.length(); i++) {
-				hnode.setMid(new HNode());
-				hnode.getMid().setVal(p.value.charAt(i));
-				hnode = hnode.getMid();
-			}
+    private void buildFusionTree(PatriciaTrie p, String s) {
 
-			if (p.isLeaf()) {
-				hnode.setEnd(true);
-			}else{
+        if (last == ENDCHAR)
+            p.addWord(s);
+        if (isLeaf())
+            return;
 
-			p.convertNode(hnode);
-			}
+        for (PatriciaTrie p2 : nodes) {
+            p2.buildFusionTree(p, s + p2.value);
+        }
+    }
 
-		}
-		return h;
+    public HybridTrie convert() {
 
-	}
+        HybridTrie h = new HybridTrie();
+        HNode hnode;
+        for (PatriciaTrie p : nodes) {
+            hnode = h.getRoot();
+            if (p.value.equals("")) {
+                hnode.setEnd(true);
+                break;
+            }
 
-	private void convertNode(HNode hnode) {
+            if (hnode == null) {
+                h.setRoot(new HNode());
+                hnode = h.getRoot();
+            } else {
+                hnode = getNextNode(hnode, p.value.charAt(0));
+            }
 
-		HNode temp;
-		temp = hnode;
+            hnode.setVal(p.value.charAt(0));
+            for (int i = 1; i < p.value.length(); i++) {
+                hnode.setMid(new HNode());
+                hnode.getMid().setVal(p.value.charAt(i));
+                hnode = hnode.getMid();
+            }
 
-		for (PatriciaTrie p : nodes) {
+            if (p.isLeaf()) {
+                hnode.setEnd(true);
+            } else {
 
-			hnode = temp;
+                p.convertNode(hnode);
+            }
 
-			if (p.value.equals("")) {
-				temp.setEnd(true);
+        }
+        return h;
 
-			} else {
+    }
 
-				if (hnode.getMid() == null) {
-					hnode.setMid(new HNode());
-					hnode = hnode.getMid();
-				} else {
-					hnode = getNextNode(hnode.getMid(), p.value.charAt(0));
-				}
+    private void convertNode(HNode hnode) {
 
-				hnode.setVal(p.value.charAt(0));
-				for (int i = 1; i < p.value.length(); i++) {
-					hnode.setMid(new HNode());
-					hnode.getMid().setVal(p.value.charAt(i));
-					hnode = hnode.getMid();
-				}
+        HNode temp;
+        temp = hnode;
 
-				if (p.isLeaf()) {
-					hnode.setEnd(true);
+        for (PatriciaTrie p : nodes) {
 
-				} else {
-					p.convertNode(hnode);
-				}
+            hnode = temp;
 
-			}
-		}
+            if (p.value.equals("")) {
+                temp.setEnd(true);
 
-	}
+            } else {
 
-	private HNode getNextNode(HNode hnode, char charAt) {
-		if (charAt < hnode.getVal()) {
-			if (hnode.getLeft() == null) {
-				hnode.setLeft(new HNode());
-				return hnode.getLeft();
-			}
-			return getNextNode(hnode.getLeft(), charAt);
-		} else {
-			if (hnode.getRight() == null) {
-				hnode.setRight(new HNode());
-				return hnode.getRight();
-			}
-			return getNextNode(hnode.getRight(), charAt);
-		}
-	}
+                if (hnode.getMid() == null) {
+                    hnode.setMid(new HNode());
+                    hnode = hnode.getMid();
+                } else {
+                    hnode = getNextNode(hnode.getMid(), p.value.charAt(0));
+                }
 
-	@Override
-	public String toString() {
+                hnode.setVal(p.value.charAt(0));
+                for (int i = 1; i < p.value.length(); i++) {
+                    hnode.setMid(new HNode());
+                    hnode.getMid().setVal(p.value.charAt(i));
+                    hnode = hnode.getMid();
+                }
 
-		return value + "/" + last;
-	}
+                if (p.isLeaf()) {
+                    hnode.setEnd(true);
 
-	public void addNodes(List<PatriciaTrie> tries) {
-		nodes.addAll(tries);
+                } else {
+                    p.convertNode(hnode);
+                }
 
-	}
+            }
+        }
 
-	public void addNode(PatriciaTrie tries) {
-		nodes.add(tries);
+    }
 
-	}
+    private HNode getNextNode(HNode hnode, char charAt) {
+        if (charAt < hnode.getVal()) {
+            if (hnode.getLeft() == null) {
+                hnode.setLeft(new HNode());
+                return hnode.getLeft();
+            }
+            return getNextNode(hnode.getLeft(), charAt);
+        } else {
+            if (hnode.getRight() == null) {
+                hnode.setRight(new HNode());
+                return hnode.getRight();
+            }
+            return getNextNode(hnode.getRight(), charAt);
+        }
+    }
 
-	public void setLast(boolean end) {
-		if (end)
-			last = ENDCHAR;
-		else
-			last = 'n';
-	}
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        nodes.forEach(n -> b.append(n.value).append("|"));
+        return value + "/" + last + "\n" + b.toString() + "\n";
+    }
 
+    public void addNode(PatriciaTrie tries) {
+        nodes.add(tries);
+
+    }
+
+    public void setLast(boolean end) {
+        if (end)
+            last = ENDCHAR;
+        else
+            last = 'n';
+    }
+
+    public String draw(int i) {
+        StringBuilder builder = new StringBuilder();
+        for (int j = 0; j < i; j++) {
+            builder.append(" ");
+        }
+        builder.append(value);
+        if (isWord()) {
+            builder.append('*');
+        }
+        builder.append("\n");
+        i++;
+        int nextSpacer = i;
+        nodes.forEach(n -> builder.append(n.draw(nextSpacer)));
+        return builder.toString();
+    }
 }

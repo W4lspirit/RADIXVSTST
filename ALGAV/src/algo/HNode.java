@@ -1,12 +1,9 @@
 package algo;
 
-import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HNode {
-	private static final int JMP_X = 10;
-	private static final int JMP_Y = 10;
 	/*******************************************************/
 	/*-------------------PARAMETERS------------------------*/
 	/*******************************************************/
@@ -14,13 +11,19 @@ public class HNode {
 	private HNode left, mid, right;
 	private boolean end = false;
 
+	/*******************************************************/
+	/*-------------------CONSTRUCTORS----------------------*/
+	/*******************************************************/
 	public HNode(char c) {
 		this.val = c;
 	}
 
 	public HNode() {
-		// TODO Auto-generated constructor stub
 	}
+
+	/*******************************************************/
+	/*-------------------PRINCIPAL METHODS-----------------*/
+	/*******************************************************/
 
 	public static HNode insert(HNode node, String word) {
 		char x = word.charAt(0);
@@ -135,10 +138,59 @@ public class HNode {
 		}
 	}
 
-	/*******************************************************/
-	/*-------------------USEFUL METHODS--------------------*/
+	public static void convert(PatriciaTrie parent, HNode node, String prefix, boolean mid) {
+		// System.out.println(parent.toString());
 
-	/*******************************************************/
+		if (node != null) {
+			// System.out.println(node.toString());
+			if (isLeaf(node)) {
+				parent.addNode(new PatriciaTrie(prefix + node.val, node.isEnd()));
+			} else if (!hasNeighbour(node)) {
+				// continue
+				// check if word
+				PatriciaTrie tmp = parent;
+				prefix += node.val;
+				if (node.isEnd()) {
+					// ajout noeud intermediaire
+					tmp = new PatriciaTrie(prefix, false);
+					parent.addNode(tmp);
+					// son end
+					tmp.addNode(new PatriciaTrie("", true));
+					// on lui ajoute lasuite
+					// reset prefix
+
+					prefix = "";
+				}
+				convert(tmp, node.mid, prefix, true);
+			} else {
+				// split
+				PatriciaTrie tmp = parent;
+				if (mid) {
+					tmp = new PatriciaTrie(prefix, false);
+					parent.addNode(tmp);
+				}
+
+				// ajout au noeud parent
+
+				// ajout de ces fils
+				convert(tmp, node.left, "", false);
+				convert(tmp, node.right, "", false);
+				if (node.isEnd()) {
+					// add intermediate node
+					PatriciaTrie tmp2 = new PatriciaTrie("" + node.val, false);
+					tmp.addNode(tmp2);
+					// son end
+					tmp2.addNode(new PatriciaTrie("", true));
+
+					convert(tmp2, node.mid, "", true);
+				} else {
+					convert(tmp, node.mid, "" + node.val, true);
+				}
+
+			}
+		}
+	}
+
 	public static List<String> getWords(HNode node, String prefix) {
 		List<String> words = new ArrayList<>();
 		if (node != null) {
@@ -185,6 +237,10 @@ public class HNode {
 			return val + getNumberOfWords(node.mid) + getNumberOfWords(node.left) + getNumberOfWords(node.right);
 		}
 	}
+
+	/*******************************************************/
+	/*-------------------USEFUL METHODS--------------------*/
+	/*******************************************************/
 
 	private static int getLevels(HNode node) {
 		if (node == null)
@@ -289,87 +345,6 @@ public class HNode {
 		this.mid = mid;
 	}
 
-	/* Print plot */
-	public static void draw(Graphics g, HNode node, int i, int j) {
-		if (node == null) {
-			return;
-		}
-		g.drawOval(5, 5, i, j);
-		draw(g, node.left, i - (widthL(node.mid) + widthR(node.left) + 1) * JMP_X, j + JMP_Y);
-		g.drawOval(5, 5, i, j);
-		draw(g, node.mid, i, j + JMP_Y);
-		g.drawOval(5, 5, i, j);
-		draw(g, node.right, i - (widthR(node.mid) + widthL(node.right) + 1) * JMP_X, j + JMP_Y);
-		System.out.println();
-
-	}
-
-	private static int widthR(HNode node) {
-		if (node == null)
-			return 0;
-		else
-			return widthR(node.mid) + width(node.right);
-	}
-
-	private static int widthL(HNode node) {
-		if (node == null)
-			return 0;
-		else
-			return widthL(node.mid) + width(node.right);
-	}
-
-	private static int width(HNode node) {
-		if (node == null)
-			return 0;
-		else {
-			if (node.left == null && node.mid == null && node.right == null)
-				return 1;
-			else
-				return (width(node.left) + width(node.mid) + width(node.right));
-		}
-	}
-
-	public static List<PatriciaTrie> getNeighbour(HNode node, String prefix) {
-		List<PatriciaTrie> tries = new ArrayList<>();
-		if (node == null) {
-			return tries;
-		}
-		PatriciaTrie l = getLongestPrefix(node.left, prefix);
-		tries.add(l);
-		tries.addAll(getNeighbour(node.left, prefix));
-		PatriciaTrie r = getLongestPrefix(node.right, prefix);
-		tries.add(r);
-		tries.addAll(getNeighbour(node.right, prefix));
-		tries.add(getLongestPrefix(node, prefix));
-
-		return tries;
-	}
-
-	public static PatriciaTrie getLongestPrefix(HNode node, String prefix) {
-		if (node == null) {
-			return null;
-		}
-		if (isLeaf(node)) {
-			return new PatriciaTrie(prefix + node.val, node.end);
-		} else {
-			if (hasSon(node)) {
-				PatriciaTrie p;
-				if (hasNeighbour(node.mid)) {
-					p = new PatriciaTrie(prefix, node.end);
-					p.addNodes(getNeighbour(node.mid, prefix));
-					p.addNode(getLongestPrefix(node.mid, ""));
-				} else {
-					p = getLongestPrefix(node.mid, prefix + node.val);
-				}
-				return p;
-
-			}
-
-		}
-		return null;
-
-	}
-
 	private static boolean isLeaf(HNode node) {
 		return node.end && node.mid == null && node.left == null && node.right == null;
 	}
@@ -377,11 +352,7 @@ public class HNode {
 	private static boolean hasNeighbour(HNode node) {
 		return node.left != null || node.right != null;
 	}
-
-	private static boolean hasSon(HNode node) {
-		return node.mid != null;
-	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 *
@@ -390,7 +361,35 @@ public class HNode {
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return val + "";
+		String v = val + "\n";
+		String n = "<";
+		if (left != null)
+			n += left.val + ",";
+		if (mid != null)
+			n += mid.val + ",";
+		if (right != null)
+			n += right.val;
+		n += ">\n";
+		return v + n;
+	}
+
+	public static String draw(HNode root, int i) {
+		if (root == null)
+			return "";
+		StringBuilder builder = new StringBuilder();
+		for (int j = 0; j < i; j++) {
+			builder.append(" ");
+		}
+		builder.append(root.val);
+		if (root.end) {
+			builder.append('*');
+		}
+		builder.append("\n");
+		i++;
+		builder.append(draw(root.left, i));
+		builder.append(draw(root.mid, i));
+		builder.append(draw(root.right, i));
+		return builder.toString();
 	}
 
 }

@@ -1,6 +1,5 @@
 package algo;
 
-import java.awt.Graphics;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,8 +13,8 @@ public class HybridTrie implements ITrie {
 
 	/*******************************************************/
 	/*-------------------PRINCIPAL METHODS-----------------*/
-
 	/*******************************************************/
+
 	@Override
 	public boolean search(String word) {
 		return HNode.search(root, word);
@@ -62,14 +61,15 @@ public class HybridTrie implements ITrie {
 	/*******************************************************/
 	/*-------------------USEFUL METHODS--------------------*/
 	/*******************************************************/
-	public void draw(Graphics g) {
-		HNode.draw(g,root, 0, 0);
+
+	public String draw() {
+		return HNode.draw(root, 0);
 	}
 
 	public PatriciaTrie convert() {
-		List<PatriciaTrie> patriciaTries = HNode.getNeighbour(root, "");
 		PatriciaTrie p = new PatriciaTrie();
-		p.addNodes(patriciaTries);
+		HNode.convert(p, root, "", false);
+
 		return p;
 
 	}
