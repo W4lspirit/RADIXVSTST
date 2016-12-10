@@ -242,24 +242,34 @@ public class PatriciaTrie implements ITrie {
 	public int Prefixe(String word) {
 		int min;
 		int charFound = 0;
-		for (PatriciaTrie p : nodes) {
-			if (word.length() >= p.value.length()) {
-				min = p.value.length();
-			} else {
-				min = word.length();
-
-			}
-			for (int i = 0; i < min; i++) {
+		for (PatriciaTrie p : nodes) { // On parcourt les noeuds fils du noeud courant
+			
+		
+			if (word.length() >= p.value.length()) { 
+				min = p.value.length();				
+			} else {								// Ici on calcule le minimum 						
+				min = word.length();				//entre le mot et la valeur du noeud				
+													
+			}										
+			
+			
+			for (int i = 0; i < min; i++) { // on parcourt caractère après caractère
 				if (word.charAt(i) != p.value.charAt(i))
-					break;
+					break; // le caractère est différent, on sort
 				charFound++;
 			}
-			if (charFound != 0) {
-				String temp = word.substring(charFound);
+			if (charFound != 0) {// des caractères ont été trouvés pour ce fils
+				
+				String temp = word.substring(charFound); // on calcule la chaine des 
+														//caractères restant a trouver dans le fils
 
-				if (temp.equals(""))
-					return p.ComptageMots();
-				return p.Prefixe(temp);
+				if (temp.equals("")) // si il ne reste aucun caractère
+					
+					return p.ComptageMots();// traitement: ici pour prefixe, le nombre de mots pour 
+											//ce prefixe.
+				
+				return p.Prefixe(temp);//sinon on rapelle cette meme fonction sur ce 
+										//fils avec la chaine des caractères restants
 
 			}
 		}
@@ -329,20 +339,20 @@ public class PatriciaTrie implements ITrie {
 	public HybridTrie convert() {
 
 		HybridTrie h = new HybridTrie();
-		HNode root = h.getRoot();
 		HNode hnode;
 		for (PatriciaTrie p : nodes) {
-			hnode = root;
+			String test = p.value;
+			hnode = h.getRoot();
 			if (p.value.equals("")) {
 				hnode.setEnd(true);
 				break;
 			}
 
-			if (hnode.getMid() == null) {
-				hnode.setMid(new HNode());
-				hnode = hnode.getMid();
+			if (hnode == null) {
+				h.setRoot(new HNode());
+				hnode = h.getRoot();
 			} else {
-				hnode = getNextNode(hnode.getMid(), p.value.charAt(0));
+				hnode = getNextNode(hnode, p.value.charAt(0));
 			}
 
 			hnode.setVal(p.value.charAt(0));
@@ -354,10 +364,10 @@ public class PatriciaTrie implements ITrie {
 
 			if (p.isLeaf()) {
 				hnode.setEnd(true);
-				break;
-			}
+			}else{
 
 			p.convertNode(hnode);
+			}
 
 		}
 		return h;
