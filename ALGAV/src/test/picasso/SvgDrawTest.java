@@ -1,6 +1,7 @@
 package test.picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -54,7 +55,9 @@ public class SvgDrawTest {
 		HybridTrie hybridTrie = new HybridTrie();
 		try {
 			Set<String> set = f.readFiles(fileNames);
-			for (String string : set) {
+			List<String> l = new ArrayList<>(set);
+			Collections.shuffle(l);
+			for (String string : l) {
 				hybridTrie.addWord(string);
 			}
 			System.out.println(hybridTrie.draw());

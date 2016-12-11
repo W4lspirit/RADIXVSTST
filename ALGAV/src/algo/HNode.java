@@ -13,7 +13,9 @@ public class HNode {
 
 	/*******************************************************/
 	/*-------------------CONSTRUCTORS----------------------*/
+
 	/*******************************************************/
+
 	public HNode(char c) {
 		this.val = c;
 	}
@@ -23,6 +25,7 @@ public class HNode {
 
 	/*******************************************************/
 	/*-------------------PRINCIPAL METHODS-----------------*/
+
 	/*******************************************************/
 
 	public static HNode insert(HNode node, String word) {
@@ -138,52 +141,61 @@ public class HNode {
 		}
 	}
 
+	/**
+	 * Convert a ternary node into a patricia trie
+	 * 
+	 * @param parent
+	 *            PatriciaTrie
+	 * @param node
+	 *            current node
+	 * @param prefix
+	 *            the prefix
+	 * @param mid
+	 *            true if the fonction is apply to a middle node
+	 */
 	public static void convert(PatriciaTrie parent, HNode node, String prefix, boolean mid) {
 		// System.out.println(parent.toString());
-
 		if (node != null) {
 			// System.out.println(node.toString());
 			if (isLeaf(node)) {
 				parent.addNode(new PatriciaTrie(prefix + node.val, node.isEnd()));
 			} else if (!hasNeighbour(node)) {
-				// continue
-				// check if word
 				PatriciaTrie tmp = parent;
 				prefix += node.val;
 				if (node.isEnd()) {
-					// ajout noeud intermediaire
+					// add intermediate Patrica
 					tmp = new PatriciaTrie(prefix, false);
 					parent.addNode(tmp);
-					// son end
+					// add end word
 					tmp.addNode(new PatriciaTrie("", true));
-					// on lui ajoute lasuite
 					// reset prefix
-
 					prefix = "";
 				}
+				// convert middle node
 				convert(tmp, node.mid, prefix, true);
 			} else {
-				// split
+
 				PatriciaTrie tmp = parent;
+				// add intermediate Patrica to the parent if the current node
+				// was a middle node
 				if (mid) {
+					// the new Patrica is the new parent
 					tmp = new PatriciaTrie(prefix, false);
 					parent.addNode(tmp);
 				}
-
-				// ajout au noeud parent
-
-				// ajout de ces fils
+				// add left and right node to parent
 				convert(tmp, node.left, "", false);
 				convert(tmp, node.right, "", false);
 				if (node.isEnd()) {
-					// add intermediate node
+					// add intermediate Patrica
 					PatriciaTrie tmp2 = new PatriciaTrie("" + node.val, false);
 					tmp.addNode(tmp2);
-					// son end
+					// add end word
 					tmp2.addNode(new PatriciaTrie("", true));
-
+					// convert into tmp2
 					convert(tmp2, node.mid, "", true);
 				} else {
+					// convert into tmp
 					convert(tmp, node.mid, "" + node.val, true);
 				}
 
@@ -240,6 +252,7 @@ public class HNode {
 
 	/*******************************************************/
 	/*-------------------USEFUL METHODS--------------------*/
+
 	/*******************************************************/
 
 	private static int getLevels(HNode node) {
@@ -264,6 +277,65 @@ public class HNode {
 			return isBalanced(node.mid) && isBalanced(node.left) && isBalanced(node.right)
 					&& Math.abs(height(node.right) - height(node.left)) < 3;
 		}
+	}
+
+	// TODO
+
+	static int balance(HNode node) {
+		HNode tmp = node;
+		int ll = 0, lc = 0, lr = 0;
+		int rl = 0, rc = 0, rr = 0;
+		int l = height(node.left);
+		int c = height(node.mid);
+		int r = height(node.right);
+		if (c > 1 + Math.max(l, r)) {
+			// center to left if left is amx
+			// center to right if right is max
+			/*
+			 * then apply a center-to-left/right transformation
+			 */
+		}
+		HNode left = tmp.left;
+		if (left != null) {
+			ll = height(left.left);
+			lc = height(left.mid);
+			lr = height(left.right);
+		}
+		if (l > 1 + Math.max(c, r) && lc <= Math.max(ll, lr)) {
+			// and is not tnodeR
+			// aply left to center
+		} else {
+			if (l > 1 + Math.max(c, r) && lc > Math.max(ll, lr)) {
+				// not tnodeR
+				// then apply a center-to-left/right transformation followed by
+				// a left-to-center transfor-
+				// mation
+			} else {
+				HNode right = tmp.right;
+				if (right != null) {
+					rl = height(right.left);
+					rc = height(right.mid);
+					rr = height(right.right);
+				}
+				if (r > 1 + Math.max(c, l) && rc <= Math.max(rl, rr)) {
+					// not tnodel
+					// then apply a right-to-center transformation
+				} else {
+					if (r > 1 + Math.max(c, l) && rc > Math.max(rl, rr)) {
+						// not tnodel
+						// then apply a center-to-left/right transformation
+						// followed by a right-to-center trans-
+						// formation
+					}
+				}
+			}
+		}
+
+		/*
+		 * If a points to the root then end the procedure, or set a to its
+		 * parent and continue from Step 2
+		 */
+		return 0;
 	}
 
 	/*******************************************************/
@@ -352,7 +424,7 @@ public class HNode {
 	private static boolean hasNeighbour(HNode node) {
 		return node.left != null || node.right != null;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 *
