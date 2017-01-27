@@ -1,5 +1,9 @@
 package test.experimental;
 
+import algo.HybridTrie;
+import algo.PatriciaTrie;
+import parser.FilesParser;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,13 +14,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import algo.HybridTrie;
-import algo.PatriciaTrie;
-import parser.FilesParser;
-
 public class Exp {
-
-	public static void main(String[] args) {
+    //
+    public static void main(String[] args) {
 		try (Stream<Path> paths = Files.walk(Paths.get("Shakespeare"))) {
 
 			List<String> files = new ArrayList<>();
